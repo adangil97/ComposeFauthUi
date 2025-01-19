@@ -1,0 +1,68 @@
+# Gradle & Kotlin
+.gradle/
+build/
+local.properties
+*.hprof
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Mac OS
+.DS_Store
+.AppleDouble
+.LSOverride
+xcuserdata/
+
+# CocoaPods
+Pods/
+*.xcworkspace
+Podfile.lock
+
+# Kotlin Multiplatform
+*.podspec
+.externalNativeBuild/
+.cxx/
+captures/
+*.so
+*.dylib
+*.dll
+*.a
+
+# JavaScript/TypeScript (si tu KMP incluye JS/TS targets)
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.npm/
+.yarn/
+
+# XCode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Archivos generados por KMP
+iosApp/Pods/
+shared/build/
+shared/bin/
+shared/*.framework/
+shared/*.xcframework/
+
+# Archivos de configuración específicos
+kotlin-js-store/
+.kotlin/
