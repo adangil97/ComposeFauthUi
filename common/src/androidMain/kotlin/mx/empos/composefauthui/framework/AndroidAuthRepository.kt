@@ -23,16 +23,22 @@ class AndroidAuthRepository(
         fauthConfiguration: FauthConfiguration,
         callback: () -> Any
     ) {
+        val commonConfiguration = fauthConfiguration.commonConfiguration
         val androidConfiguration = fauthConfiguration.androidConfiguration
 
         val providers = fauthConfiguration.providers.map {
             when (it) {
-                is FauthProviders.Email -> AuthUI.IdpConfig.EmailBuilder()
-                    .apply {
-                        this.setAllowNewAccounts(it.androidProviderConfiguration.allowNewAccounts)
-                        this.setRequireName(it.androidProviderConfiguration.requireName)
-                    }
-                    .build()
+                is FauthProviders.Email -> {
+                    AuthUI.IdpConfig.EmailBuilder()
+                        .apply {
+                            if (it.commonProviderConfiguration.forceSameDevice) {
+                                this.setForceSameDevice()
+                            }
+                            this.setAllowNewAccounts(it.commonProviderConfiguration.allowNewAccounts)
+                            this.setRequireName(it.commonProviderConfiguration.requireName)
+                        }
+                        .build()
+                }
 
                 FauthProviders.Facebook -> AuthUI.IdpConfig.FacebookBuilder().build()
                 FauthProviders.Google -> AuthUI.IdpConfig.GoogleBuilder().build()
@@ -45,8 +51,8 @@ class AndroidAuthRepository(
             .setAvailableProviders(providers)
             .setLogo(androidConfiguration.logo)
             .setTosAndPrivacyPolicyUrls(
-                androidConfiguration.tosUrl,
-                androidConfiguration.privacyPolicyUrl
+                commonConfiguration.tosUrl,
+                commonConfiguration.privacyPolicyUrl
             )
             .setTheme(androidConfiguration.theme)
             .build()

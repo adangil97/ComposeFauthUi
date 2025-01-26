@@ -28,23 +28,24 @@ class IosAuthRepository : AuthRepository {
         fauthConfiguration: FauthConfiguration,
         callback: () -> Any
     ) {
+        val commonConfiguration = fauthConfiguration.commonConfiguration
         val iosConfiguration = fauthConfiguration.iosConfiguration
         authUi?.let { fuiAuth ->
             (callback() as? FUIAuthDelegateProtocol)?.let { delegate ->
                 fuiAuth.delegate = delegate
             }
-            fuiAuth.shouldHideCancelButton = true
-            fuiAuth.TOSURL = NSURL(string = iosConfiguration.tosUrl)
-            fuiAuth.privacyPolicyURL = NSURL(string = iosConfiguration.privacyPolicyUrl)
+            fuiAuth.shouldHideCancelButton = iosConfiguration.shouldHideCancelButton
+            fuiAuth.TOSURL = NSURL(string = commonConfiguration.tosUrl)
+            fuiAuth.privacyPolicyURL = NSURL(string = commonConfiguration.privacyPolicyUrl)
             fuiAuth.providers = fauthConfiguration.providers.map {
                 when (it) {
                     is FauthProviders.Email -> {
                         FUIEmailAuth(
                             authAuthUI = fuiAuth,
                             signInMethod = it.iosProviderConfiguration.signInMethod,
-                            forceSameDevice = it.iosProviderConfiguration.forceSameDevice,
-                            allowNewEmailAccounts = it.iosProviderConfiguration.allowNewAccounts,
-                            requireDisplayName = it.iosProviderConfiguration.requireName,
+                            forceSameDevice = it.commonProviderConfiguration.forceSameDevice,
+                            allowNewEmailAccounts = it.commonProviderConfiguration.allowNewAccounts,
+                            requireDisplayName = it.commonProviderConfiguration.requireName,
                             actionCodeSetting = FIRActionCodeSettings()
                         )
                     }
