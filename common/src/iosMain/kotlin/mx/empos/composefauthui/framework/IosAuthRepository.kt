@@ -59,7 +59,7 @@ class IosAuthRepository : AuthRepository {
                 FUIFacebookAuth(fuiAuth),
                 FUIEmailAuth(
                     authAuthUI = fuiAuth,
-                    signInMethod = "FIREmailPasswordAuthSignInMethod",
+                    signInMethod = iosConfiguration.signInMethod,
                     forceSameDevice = false,
                     allowNewEmailAccounts = false,
                     requireDisplayName = false,
