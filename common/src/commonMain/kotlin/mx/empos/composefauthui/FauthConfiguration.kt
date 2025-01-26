@@ -1,7 +1,7 @@
-package io.empos.composefauthui
+package mx.empos.composefauthui
 
-import io.empos.composefauthui.PlatformConfiguration.AndroidConfiguration
-import io.empos.composefauthui.PlatformConfiguration.IosConfiguration
+import mx.empos.composefauthui.PlatformConfiguration.AndroidConfiguration
+import mx.empos.composefauthui.PlatformConfiguration.IosConfiguration
 
 data class FauthConfiguration(
     val androidConfiguration: AndroidConfiguration = AndroidConfiguration(),

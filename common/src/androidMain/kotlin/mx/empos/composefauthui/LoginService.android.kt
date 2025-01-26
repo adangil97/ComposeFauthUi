@@ -1,4 +1,4 @@
-package io.empos.composefauthui
+package mx.empos.composefauthui
 
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult

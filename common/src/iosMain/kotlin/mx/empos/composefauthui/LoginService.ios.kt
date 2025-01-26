@@ -1,4 +1,4 @@
-package io.empos.composefauthui
+package mx.empos.composefauthui
 
 import cocoapods.FirebaseAuthUI.FIRUser
 import cocoapods.FirebaseAuthUI.FUIAuth

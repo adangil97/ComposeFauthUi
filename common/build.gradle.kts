@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -6,6 +7,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
+    alias(libs.plugins.vanniktech.publish)
 }
 
 kotlin {
@@ -74,7 +76,7 @@ kotlin {
 }
 
 android {
-    namespace = "io.empos.composefauthui"
+    namespace = "mx.empos.composefauthui"
     compileSdk = 34
     defaultConfig {
         minSdk = 24
@@ -82,5 +84,39 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+}
+
+mavenPublishing {
+    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+
+    signAllPublications()
+
+    coordinates("mx.empos", "composefauthui", "1.0.0")
+
+    pom {
+        name.set("Compose Fauth Ui")
+        description.set("Compose Fauth Ui is a Compose Multiplatform Library to use Firebase Auth Ui")
+        inceptionYear.set("2025")
+        url.set("https://github.com/adangil97/ComposeFauthUi/")
+        licenses {
+            license {
+                name.set("The Apache License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+            }
+        }
+        developers {
+            developer {
+                id.set("adangil97")
+                name.set("Adán Castillo")
+                url.set("https://github.com/adangil97/")
+            }
+        }
+        scm {
+            url.set("https://github.com/adangil97/ComposeFauthUi/")
+            connection.set("scm:git:git://github.com/adangil97/ComposeFauthUi.git")
+            developerConnection.set("scm:git:ssh://git@github.com/adangil97/ComposeFauthUi.git")
+        }
     }
 }

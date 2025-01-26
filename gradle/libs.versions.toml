@@ -5,6 +5,8 @@ androidx-activityCompose = "1.10.0"
 composeVersion = "1.7.3"
 firebaseAuthUi = "7.2.0"
 facebookSdk = "13.0.0"
+vanniktech = "0.30.0"
+
 pod-auth-ui = "FirebaseAuthUI"
 pod-google-auth-ui = "FirebaseGoogleAuthUI"
 pod-facebook-auth-ui = "FirebaseFacebookAuthUI"
@@ -23,3 +25,5 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeVersion" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+vanniktech-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech" }
