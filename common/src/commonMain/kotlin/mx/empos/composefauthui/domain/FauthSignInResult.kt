@@ -1,4 +1,4 @@
-package mx.empos.composefauthui
+package mx.empos.composefauthui.domain
 
 sealed class FauthSignInResult {
 

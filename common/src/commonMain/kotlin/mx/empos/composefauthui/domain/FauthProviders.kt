@@ -1,7 +1,7 @@
-package mx.empos.composefauthui
+package mx.empos.composefauthui.domain
 
-import mx.empos.composefauthui.FauthEmailProviderConfiguration.AndroidEmailProviderConfiguration
-import mx.empos.composefauthui.FauthEmailProviderConfiguration.IosEmailProviderConfiguration
+import mx.empos.composefauthui.domain.FauthEmailProviderConfiguration.AndroidEmailProviderConfiguration
+import mx.empos.composefauthui.domain.FauthEmailProviderConfiguration.IosEmailProviderConfiguration
 
 sealed class FauthProviders {
 
