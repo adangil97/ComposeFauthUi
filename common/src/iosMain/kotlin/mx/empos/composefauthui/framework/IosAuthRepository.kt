@@ -4,7 +4,6 @@ import cocoapods.FirebaseAuthUI.FUIAuth
 import cocoapods.FirebaseAuthUI.FUIAuthDelegateProtocol
 import cocoapods.FirebaseEmailAuthUI.FIRActionCodeSettings
 import cocoapods.FirebaseEmailAuthUI.FUIEmailAuth
-import cocoapods.FirebaseEmailAuthUI.FUIPasswordSignInViewController
 import cocoapods.FirebaseFacebookAuthUI.FUIFacebookAuth
 import cocoapods.FirebaseGoogleAuthUI.FUIGoogleAuth
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -54,20 +53,6 @@ class IosAuthRepository : AuthRepository {
                     FauthProviders.Google -> FUIGoogleAuth(fuiAuth)
                 }
             }
-            fuiAuth.providers = listOf(
-                FUIGoogleAuth(fuiAuth),
-                FUIFacebookAuth(fuiAuth),
-                FUIEmailAuth(
-                    authAuthUI = fuiAuth,
-                    signInMethod = iosConfiguration.signInMethod,
-                    forceSameDevice = false,
-                    allowNewEmailAccounts = false,
-                    requireDisplayName = false,
-                    actionCodeSetting = FIRActionCodeSettings()
-                ).apply {
-                    this.signInWithPresentingViewController(FUIPasswordSignInViewController())
-                }
-            )
             uiComponent = fuiAuth
         }
     }
