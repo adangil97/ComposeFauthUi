@@ -1,5 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import com.vanniktech.maven.publish.SonatypeHost
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -20,37 +22,47 @@ kotlin {
             }
         }
     }
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
+    val iosConf = libs.versions.ios
+
+    configure(listOf(iosX64(), iosArm64(), iosSimulatorArm64())) {
+        binaries {
+            framework {
+                baseName = iosConf.basename.get()
+            }
+        }
+    }
 
     cocoapods {
-        summary = "Some description for the Shared Module"
-        homepage = "Link to the Shared Module homepage"
-        version = "1.0"
-        ios.deploymentTarget = "14.1"
+        name = iosConf.basename.get()
+        summary = iosConf.summary.get()
+        homepage = iosConf.homepage.get()
+        version = iosConf.version.get()
+        ios.deploymentTarget = iosConf.taget.get()
         framework {
-            baseName = "common"
-            isStatic = true
+            baseName = iosConf.basename.get()
+            isStatic = false
+            @OptIn(ExperimentalKotlinGradlePluginApi::class)
+            transitiveExport = true
         }
-        val firebaseAuthUi = libs.versions.pod.auth.ui.get()
+        val pods = iosConf.pods
+        val firebaseAuthUi = pods.auth.ui.name.get()
         pod(firebaseAuthUi) {
-            version = "13.1.0"
+            version = pods.auth.ui.version.get()
         }
-        pod(libs.versions.pod.google.auth.ui.get()) {
+        pod(pods.google.auth.ui.get()) {
             useInteropBindingFrom(firebaseAuthUi)
-            version = "13.1.0"
+            version = pods.auth.ui.version.get()
         }
-        pod(libs.versions.pod.facebook.auth.ui.get()) {
+        pod(pods.facebook.auth.ui.get()) {
             useInteropBindingFrom(firebaseAuthUi)
-            version = "13.1.0"
+            version = pods.auth.ui.version.get()
         }
-        pod(libs.versions.pod.email.auth.ui.get()) {
+        pod(pods.email.auth.ui.get()) {
             useInteropBindingFrom(firebaseAuthUi)
-            version = "13.1.0"
+            version = pods.auth.ui.version.get()
         }
-        pod(libs.versions.pod.fb.core.get()) {
-            version = "16.3.1"
+        pod(pods.fb.core.name.get()) {
+            version = pods.fb.core.version.get()
             linkOnly = true
         }
     }
