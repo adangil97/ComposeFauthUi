@@ -37,7 +37,7 @@ kotlin {
         summary = iosConf.summary.get()
         homepage = iosConf.homepage.get()
         version = iosConf.version.get()
-        ios.deploymentTarget = iosConf.taget.get()
+        ios.deploymentTarget = iosConf.target.get()
         framework {
             baseName = iosConf.basename.get()
             isStatic = false
