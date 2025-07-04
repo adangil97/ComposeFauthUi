@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -23,14 +21,12 @@ kotlin {
         }
     }
     val iosConf = libs.versions.ios
+    val pods = iosConf.pods
+    val firebaseAuthUi = pods.auth.ui.name.get()
 
-    configure(listOf(iosX64(), iosArm64(), iosSimulatorArm64())) {
-        binaries {
-            framework {
-                baseName = iosConf.basename.get()
-            }
-        }
-    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     cocoapods {
         name = iosConf.basename.get()
@@ -41,11 +37,7 @@ kotlin {
         framework {
             baseName = iosConf.basename.get()
             isStatic = false
-            @OptIn(ExperimentalKotlinGradlePluginApi::class)
-            transitiveExport = true
         }
-        val pods = iosConf.pods
-        val firebaseAuthUi = pods.auth.ui.name.get()
         pod(firebaseAuthUi) {
             version = pods.auth.ui.version.get()
         }

@@ -3,6 +3,7 @@ package mx.empos.composefauthui.framework
 import android.content.Context
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GetTokenResult
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthProviders
@@ -63,9 +64,14 @@ class AndroidAuthRepository(
     }
 
     override suspend fun getAuthToken(refresh: Boolean): String {
-        return auth
-            .currentUser
-            ?.getIdToken(refresh)
-            ?.await()?.token.orEmpty()
+        return getIdToken(refresh)?.token.orEmpty()
+    }
+
+    override suspend fun getExpirationTimestamp(refresh: Boolean): Long {
+        return getIdToken(refresh)?.expirationTimestamp ?: 0
+    }
+
+    private suspend fun getIdToken(refresh: Boolean): GetTokenResult? {
+        return auth.currentUser?.getIdToken(refresh)?.await()
     }
 }

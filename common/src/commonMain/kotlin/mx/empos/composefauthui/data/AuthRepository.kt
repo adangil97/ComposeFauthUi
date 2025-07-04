@@ -15,4 +15,6 @@ interface AuthRepository {
     suspend fun logout()
 
     suspend fun getAuthToken(refresh: Boolean): String
+
+    suspend fun getExpirationTimestamp(refresh: Boolean): Long
 }

@@ -1,5 +1,6 @@
 package mx.empos.composefauthui.framework
 
+import cocoapods.FirebaseAuthUI.FIRAuthTokenResult
 import cocoapods.FirebaseAuthUI.FUIAuth
 import cocoapods.FirebaseAuthUI.FUIAuthDelegateProtocol
 import cocoapods.FirebaseEmailAuthUI.FIRActionCodeSettings
@@ -11,6 +12,7 @@ import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthProviders
 import platform.Foundation.NSURL
+import platform.Foundation.timeIntervalSince1970
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -63,16 +65,26 @@ class IosAuthRepository : AuthRepository {
     }
 
     override suspend fun getAuthToken(refresh: Boolean): String {
+        return getIdToken(refresh)?.token().orEmpty()
+    }
+
+    override suspend fun getExpirationTimestamp(refresh: Boolean): Long {
+        return getIdToken(refresh)?.expirationDate()?.let { expirationDate ->
+            (expirationDate.timeIntervalSince1970 * 1000).toLong()
+        } ?: 0
+    }
+
+    private suspend fun getIdToken(refresh: Boolean): FIRAuthTokenResult? {
         val token = suspendCoroutine { continuation ->
             FUIAuth.defaultAuthUI()?.auth()?.currentUser()
                 ?.getIDTokenResultForcingRefresh(refresh) { authResult, error ->
                     error?.let {
                         continuation.resume(null)
                     } ?: run {
-                        continuation.resume(authResult?.token())
+                        continuation.resume(authResult)
                     }
                 } ?: continuation.resume(null)
         }
-        return token.orEmpty()
+        return token
     }
 }

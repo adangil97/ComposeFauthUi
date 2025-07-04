@@ -13,7 +13,7 @@ let package = Package(
     targets: [
         .binaryTarget(
             name: "common",
-            path: "./common.xcframework"
+            path: "common.xcframework"
         ),
     ]
 )
