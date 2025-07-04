@@ -1,6 +1,7 @@
 package mx.empos.composefauthui.data
 
 import mx.empos.composefauthui.domain.FauthConfiguration
+import mx.empos.composefauthui.domain.FauthResult
 
 interface AuthRepository {
     var uiComponent: Any?
@@ -14,7 +15,5 @@ interface AuthRepository {
 
     suspend fun logout()
 
-    suspend fun getAuthToken(refresh: Boolean): String
-
-    suspend fun getAuthTimestamp(refresh: Boolean): Long
+    suspend fun getAuthToken(refresh: Boolean): FauthResult?
 }

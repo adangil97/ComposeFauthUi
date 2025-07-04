@@ -11,6 +11,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthProviders
+import mx.empos.composefauthui.domain.FauthResult
 import platform.Foundation.NSURL
 import platform.Foundation.timeIntervalSince1970
 import kotlin.coroutines.resume
@@ -64,14 +65,13 @@ class IosAuthRepository : AuthRepository {
         authUi?.signOutWithError(null)
     }
 
-    override suspend fun getAuthToken(refresh: Boolean): String {
-        return getIdToken(refresh)?.token().orEmpty()
-    }
-
-    override suspend fun getAuthTimestamp(refresh: Boolean): Long {
-        return getIdToken(refresh)?.expirationDate()?.let { expirationDate ->
-            (expirationDate.timeIntervalSince1970 * 1000).toLong()
-        } ?: 0
+    override suspend fun getAuthToken(refresh: Boolean): FauthResult? {
+        return getIdToken(refresh)?.let {
+            FauthResult(
+                token = it.token(),
+                timestamp = (it.authDate().timeIntervalSince1970 * 1000).toLong()
+            )
+        }
     }
 
     private suspend fun getIdToken(refresh: Boolean): FIRAuthTokenResult? {

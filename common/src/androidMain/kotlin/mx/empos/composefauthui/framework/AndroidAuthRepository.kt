@@ -7,6 +7,7 @@ import com.google.firebase.auth.GetTokenResult
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthProviders
+import mx.empos.composefauthui.domain.FauthResult
 
 class AndroidAuthRepository(
     private val context: Context
@@ -63,12 +64,13 @@ class AndroidAuthRepository(
         authUi.signOut(context).await()
     }
 
-    override suspend fun getAuthToken(refresh: Boolean): String {
-        return getIdToken(refresh)?.token.orEmpty()
-    }
-
-    override suspend fun getAuthTimestamp(refresh: Boolean): Long {
-        return getIdToken(refresh)?.expirationTimestamp ?: 0
+    override suspend fun getAuthToken(refresh: Boolean): FauthResult? {
+        return getIdToken(refresh)?.let {
+            FauthResult(
+                token = it.token.orEmpty(),
+                timestamp = (it.expirationTimestamp * 1000)
+            )
+        }
     }
 
     private suspend fun getIdToken(refresh: Boolean): GetTokenResult? {
