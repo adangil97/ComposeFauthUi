@@ -67,8 +67,8 @@ class AndroidAuthRepository(
         return getIdToken(refresh)?.token.orEmpty()
     }
 
-    override suspend fun getExpirationTimestamp(refresh: Boolean): Long {
-        return getIdToken(refresh)?.expirationTimestamp ?: 0
+    override suspend fun getAuthTimestamp(refresh: Boolean): Long {
+        return getIdToken(refresh)?.authTimestamp ?: 0
     }
 
     private suspend fun getIdToken(refresh: Boolean): GetTokenResult? {

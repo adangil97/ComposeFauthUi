@@ -16,5 +16,5 @@ interface AuthRepository {
 
     suspend fun getAuthToken(refresh: Boolean): String
 
-    suspend fun getExpirationTimestamp(refresh: Boolean): Long
+    suspend fun getAuthTimestamp(refresh: Boolean): Long
 }

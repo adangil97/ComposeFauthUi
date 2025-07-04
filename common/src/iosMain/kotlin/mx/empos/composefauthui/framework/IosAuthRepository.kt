@@ -68,8 +68,8 @@ class IosAuthRepository : AuthRepository {
         return getIdToken(refresh)?.token().orEmpty()
     }
 
-    override suspend fun getExpirationTimestamp(refresh: Boolean): Long {
-        return getIdToken(refresh)?.expirationDate()?.let { expirationDate ->
+    override suspend fun getAuthTimestamp(refresh: Boolean): Long {
+        return getIdToken(refresh)?.authDate()?.let { expirationDate ->
             (expirationDate.timeIntervalSince1970 * 1000).toLong()
         } ?: 0
     }
