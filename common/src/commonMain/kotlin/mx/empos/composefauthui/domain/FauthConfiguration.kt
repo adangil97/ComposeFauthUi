@@ -13,7 +13,7 @@ data class CommonConfiguration(
 )
 
 data class AndroidConfiguration(
-    val alwaysShowSignInMethodScreen: Boolean = false,
+    val credentialManagerEnabled: Boolean = false,
     val logo: Int = -1,
     val theme: Int = -1
 )
