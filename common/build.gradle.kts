@@ -68,6 +68,7 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.firebase.auth.ui)
             implementation(libs.facebook.sdk)
+            implementation(libs.androidx.appcompat)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

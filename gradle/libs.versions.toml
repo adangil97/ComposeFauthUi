@@ -3,7 +3,7 @@ agp = "8.10.1"
 kotlin = "2.1.21"
 androidx-activityCompose = "1.10.1"
 composeVersion = "1.8.1"
-firebaseAuthUi = "7.2.0"
+firebaseAuthUi = "9.0.0"
 facebookSdk = "18.0.3"
 vanniktech = "0.30.0"
 
@@ -20,12 +20,14 @@ ios-pods-email-auth-ui = "FirebaseEmailAuthUI"
 ios-pods-phone-auth-ui = "FirebasePhoneAuthUI"
 ios-pods-fb-core-name = "FBSDKCoreKit"
 ios-pods-fb-core-version = "16.3.1"
+appcompat = "1.7.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 firebase-auth-ui = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseAuthUi" }
 facebook-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookSdk" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
