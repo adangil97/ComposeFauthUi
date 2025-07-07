@@ -1,10 +1,10 @@
 [versions]
-agp = "8.7.3"
-kotlin = "2.1.0"
-androidx-activityCompose = "1.10.0"
-composeVersion = "1.7.3"
+agp = "8.10.1"
+kotlin = "2.1.21"
+androidx-activityCompose = "1.10.1"
+composeVersion = "1.8.1"
 firebaseAuthUi = "7.2.0"
-facebookSdk = "13.0.0"
+facebookSdk = "18.0.3"
 vanniktech = "0.30.0"
 
 ios-summary = "Compose Fauth Ui For KMP Firebase UI"
@@ -17,6 +17,7 @@ ios-pods-auth-ui-version = "13.1.0"
 ios-pods-google-auth-ui = "FirebaseGoogleAuthUI"
 ios-pods-facebook-auth-ui = "FirebaseFacebookAuthUI"
 ios-pods-email-auth-ui = "FirebaseEmailAuthUI"
+ios-pods-phone-auth-ui = "FirebasePhoneAuthUI"
 ios-pods-fb-core-name = "FBSDKCoreKit"
 ios-pods-fb-core-version = "16.3.1"
 

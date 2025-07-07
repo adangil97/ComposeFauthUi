@@ -44,6 +44,7 @@ class AndroidAuthRepository(
 
                 FauthProviders.Facebook -> AuthUI.IdpConfig.FacebookBuilder().build()
                 FauthProviders.Google -> AuthUI.IdpConfig.GoogleBuilder().build()
+                FauthProviders.Phone -> AuthUI.IdpConfig.PhoneBuilder().build()
             }
         }
 

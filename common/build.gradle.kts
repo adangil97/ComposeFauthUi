@@ -53,6 +53,10 @@ kotlin {
             useInteropBindingFrom(firebaseAuthUi)
             version = pods.auth.ui.version.get()
         }
+        pod(pods.phone.auth.ui.get()) {
+            useInteropBindingFrom(firebaseAuthUi)
+            version = pods.auth.ui.version.get()
+        }
         pod(pods.fb.core.name.get()) {
             version = pods.fb.core.version.get()
             linkOnly = true

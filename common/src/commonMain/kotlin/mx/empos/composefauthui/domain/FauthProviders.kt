@@ -6,6 +6,8 @@ sealed class FauthProviders {
 
     data object Facebook : FauthProviders()
 
+    data object Phone : FauthProviders()
+
     data class Email(
         val commonProviderConfiguration: CommonEmailProviderConfiguration = CommonEmailProviderConfiguration(),
         val androidProviderConfiguration: AndroidEmailProviderConfiguration = AndroidEmailProviderConfiguration,

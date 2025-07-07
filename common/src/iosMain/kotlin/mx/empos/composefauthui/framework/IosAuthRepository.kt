@@ -7,6 +7,7 @@ import cocoapods.FirebaseEmailAuthUI.FIRActionCodeSettings
 import cocoapods.FirebaseEmailAuthUI.FUIEmailAuth
 import cocoapods.FirebaseFacebookAuthUI.FUIFacebookAuth
 import cocoapods.FirebaseGoogleAuthUI.FUIGoogleAuth
+import cocoapods.FirebasePhoneAuthUI.FUIPhoneAuth
 import kotlinx.cinterop.ExperimentalForeignApi
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
@@ -55,6 +56,7 @@ class IosAuthRepository : AuthRepository {
 
                     FauthProviders.Facebook -> FUIFacebookAuth(fuiAuth)
                     FauthProviders.Google -> FUIGoogleAuth(fuiAuth)
+                    FauthProviders.Phone -> FUIPhoneAuth(fuiAuth)
                 }
             }
             uiComponent = fuiAuth
