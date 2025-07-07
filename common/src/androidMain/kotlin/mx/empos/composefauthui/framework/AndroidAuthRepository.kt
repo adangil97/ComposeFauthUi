@@ -50,7 +50,6 @@ class AndroidAuthRepository(
 
         uiComponent = authUi
             .createSignInIntentBuilder()
-            .setIsSmartLockEnabled(androidConfiguration.isSmartLockEnabled)
             .setAvailableProviders(providers)
             .setLogo(androidConfiguration.logo)
             .setTosAndPrivacyPolicyUrls(
