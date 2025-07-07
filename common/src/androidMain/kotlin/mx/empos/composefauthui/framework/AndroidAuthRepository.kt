@@ -50,6 +50,7 @@ class AndroidAuthRepository(
 
         uiComponent = authUi
             .createSignInIntentBuilder()
+            .setAlwaysShowSignInMethodScreen(androidConfiguration.alwaysShowSignInMethodScreen)
             .setAvailableProviders(providers)
             .setLogo(androidConfiguration.logo)
             .setTosAndPrivacyPolicyUrls(
