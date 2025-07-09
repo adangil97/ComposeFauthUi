@@ -4,5 +4,9 @@ sealed class FauthSignInResult {
 
     data object Success : FauthSignInResult()
 
-    data class Error(val exception: Throwable) : FauthSignInResult()
+    data class Error(
+        val exception: Throwable,
+        val errorCode: Int? = null,
+        val errorMessage: String? = null
+    ) : FauthSignInResult()
 }
