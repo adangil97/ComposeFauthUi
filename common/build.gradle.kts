@@ -86,7 +86,7 @@ kotlin {
 
 android {
     namespace = "mx.empos.composefauthui"
-    compileSdk = 34
+    compileSdk = 35
     defaultConfig {
         minSdk = 24
     }
@@ -101,7 +101,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("mx.empos", "composefauthui", "1.0.1")
+    coordinates("mx.empos", "composefauthui", "1.0.2")
 
     pom {
         name.set("Compose Fauth Ui")
