@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import mx.empos.composefauthui.data.AuthRepository
@@ -17,7 +18,10 @@ actual fun FauthUiContent(
     fauthConfiguration: FauthConfiguration,
     fauthResult: (FauthSignInResult) -> Unit
 ) {
-    val authRepository: AuthRepository = AndroidAuthRepository(LocalContext.current)
+    val context = LocalContext.current
+    val authRepository: AuthRepository = remember {
+        AndroidAuthRepository(context)
+    }
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
