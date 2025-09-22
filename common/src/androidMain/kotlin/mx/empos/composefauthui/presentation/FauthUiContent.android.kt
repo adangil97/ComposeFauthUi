@@ -1,8 +1,8 @@
 package mx.empos.composefauthui.presentation
 
+import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
@@ -18,9 +18,10 @@ actual fun FauthUiContent(
     fauthResult: (FauthSignInResult) -> Unit
 ) {
     val authRepository: AuthRepository = AndroidAuthRepository(LocalContext.current)
+
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
-            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+            if (result.resultCode == Activity.RESULT_OK) {
                 fauthResult(FauthSignInResult.Success)
             } else {
                 val response = result.idpResponse
@@ -31,7 +32,8 @@ actual fun FauthUiContent(
                 )
             }
         }
-    LaunchedEffect(true) {
+
+    LaunchedEffect(Unit) {
         if (authRepository.userAlreadyLogin()) {
             fauthResult(FauthSignInResult.Success)
         } else {
