@@ -4,5 +4,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface ScreenManager {
 
-    val screenState: StateFlow<ScreenEvent>
+    val screenState: StateFlow<ScreenEvent?>
+
+    val screenNameOfFirebaseAuthUiLauncher: String
 }
