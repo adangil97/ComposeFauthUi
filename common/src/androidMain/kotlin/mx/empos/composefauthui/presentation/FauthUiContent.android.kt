@@ -28,12 +28,16 @@ actual fun FauthUiContent(
     }
 
     val screenState: ScreenEvent? by screenManager.screenState.collectAsStateWithLifecycle()
-    val isAppInBackground: Boolean by remember {
+    screenState?.let {
+        println("DEBUG screenState: $it")
+    }
+    val isAppInBackground: Boolean by remember(screenState) {
         derivedStateOf {
             screenState?.screenName == screenManager.screenNameOfFirebaseAuthUiLauncher
                     && (screenState is ScreenEvent.Stopped || screenState is ScreenEvent.Paused)
         }
     }
+    println("DEBUG is app in background: $isAppInBackground")
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
