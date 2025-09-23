@@ -9,12 +9,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthSignInResult
@@ -42,29 +45,6 @@ actual fun FauthUiContent(
     var authState by remember { mutableStateOf(AuthState.IDLE) }
     var wasInBackground by remember { mutableStateOf(false) }
     var hasUserCanceled by remember { mutableStateOf(false) }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_PAUSE -> {
-                    if (authState == AuthState.WAITING_RESULT) {
-                        wasInBackground = true
-                    }
-                }
-
-                Lifecycle.Event.ON_RESUME -> {
-                    wasInBackground = false
-                }
-
-                else -> Unit
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
@@ -147,6 +127,33 @@ actual fun FauthUiContent(
 
             AuthState.WAITING_RESULT,
             AuthState.COMPLETED -> Unit
+        }
+    }
+
+    val scope = rememberCoroutineScope()
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    if (authState == AuthState.WAITING_RESULT) {
+                        wasInBackground = true
+                    }
+                }
+
+                Lifecycle.Event.ON_RESUME -> {
+                    scope.launch {
+                        delay(100)
+                        wasInBackground = false
+                    }
+                }
+
+                else -> Unit
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }
