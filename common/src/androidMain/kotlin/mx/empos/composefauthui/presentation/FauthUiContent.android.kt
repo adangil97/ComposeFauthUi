@@ -34,7 +34,7 @@ actual fun FauthUiContent(
     val isAppInBackground: Boolean by remember(screenState) {
         derivedStateOf {
             screenState?.screenName != screenManager.screenNameOfFirebaseAuthUiLauncher
-                    && (screenState is ScreenEvent.Stopped || screenState is ScreenEvent.Paused)
+                    && screenState is ScreenEvent.Stopped
         }
     }
     println("DEBUG is app in background: $isAppInBackground")
