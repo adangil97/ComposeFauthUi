@@ -52,7 +52,11 @@ actual fun FauthUiContent(
                     }
                 }
 
-                else -> {}
+                Lifecycle.Event.ON_RESUME -> {
+                    wasInBackground = false
+                }
+
+                else -> Unit
             }
         }
 
@@ -69,15 +73,15 @@ actual fun FauthUiContent(
             when {
                 result.resultCode == Activity.RESULT_OK -> {
                     authState = AuthState.COMPLETED
-                    wasInBackground = false
                     fauthResult(FauthSignInResult.Success)
                 }
 
                 result.resultCode == Activity.RESULT_CANCELED && response == null -> {
                     if (wasInBackground) {
-                        wasInBackground = false
-                        authState = AuthState.LAUNCHING_AUTH
+                        // Cancelación técnica → ignorar, no reportar
+                        authState = AuthState.IDLE
                     } else {
+                        // Cancelación real del usuario
                         authState = AuthState.COMPLETED
                         hasUserCanceled = true
                         fauthResult(FauthSignInResult.Destroy)
@@ -86,7 +90,6 @@ actual fun FauthUiContent(
 
                 else -> {
                     authState = AuthState.COMPLETED
-                    wasInBackground = false
                     val exception = response?.error ?: Exception("An unknown error occurred")
                     fauthResult(
                         FauthSignInResult.Error(
@@ -121,7 +124,6 @@ actual fun FauthUiContent(
                         when (val uiComponent = authRepository.uiComponent) {
                             is Intent -> {
                                 authState = AuthState.WAITING_RESULT
-                                wasInBackground = false
                                 signInLauncher.launch(uiComponent)
                             }
 
@@ -138,6 +140,8 @@ actual fun FauthUiContent(
                         authState = AuthState.COMPLETED
                         fauthResult(FauthSignInResult.Error(exception))
                     }
+                } else {
+                    hasUserCanceled = false
                 }
             }
 
