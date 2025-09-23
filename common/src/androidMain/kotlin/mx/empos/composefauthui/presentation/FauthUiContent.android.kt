@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -25,24 +25,34 @@ actual fun FauthUiContent(
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                fauthResult(FauthSignInResult.Success)
-            } else {
-                val response = result.idpResponse
-                val exception = response?.error ?: Exception("An unknown error occurred")
-                fauthResult(
-                    FauthSignInResult.Error(
-                        exception = exception,
-                        errorCode = response?.error?.errorCode,
-                        errorMessage = response?.error?.message
+            val response = result.idpResponse
+            when {
+                result.resultCode == Activity.RESULT_OK -> {
+                    fauthResult(FauthSignInResult.Success(result.resultCode))
+                }
+
+                result.resultCode == Activity.RESULT_CANCELED  && response == null-> {
+                    fauthResult(FauthSignInResult.Destroy(result.resultCode))
+                }
+
+                else -> {
+                    val exception = response?.error ?: Exception("An unknown error occurred")
+                    fauthResult(
+                        FauthSignInResult.Error(
+                            exception = exception,
+                            errorCode = response?.error?.errorCode,
+                            errorMessage = response?.error?.message,
+                            code = result.resultCode
+                        )
                     )
-                )
+                }
             }
         }
 
-    SideEffect {
+
+    LaunchedEffect(Unit) {
         if (authRepository.userAlreadyLogin()) {
-            fauthResult(FauthSignInResult.Success)
+            fauthResult(FauthSignInResult.Success(-1))
         } else {
             try {
                 authRepository.configure(fauthConfiguration)

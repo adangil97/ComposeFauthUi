@@ -30,7 +30,7 @@ actual fun FauthUiContent(
 
             override fun authUI(authUI: FUIAuth, didSignInWithUser: FIRUser?, error: NSError?) {
                 if (error == null) {
-                    fauthResult(FauthSignInResult.Success)
+                    fauthResult(FauthSignInResult.Success())
                 } else {
                     if (error.code.toInt() == FUIAuthErrorCodeUserCancelledSignIn.toInt()) {
                         fauthResult(FauthSignInResult.Error(Exception("The user has cancelled the operation")))
@@ -48,7 +48,7 @@ actual fun FauthUiContent(
     }
     val authRepository: AuthRepository = IosAuthRepository()
     if (authRepository.userAlreadyLogin()) {
-        fauthResult(FauthSignInResult.Success)
+        fauthResult(FauthSignInResult.Success())
     } else {
         authRepository.configure(fauthConfiguration) {
             authDelegate
