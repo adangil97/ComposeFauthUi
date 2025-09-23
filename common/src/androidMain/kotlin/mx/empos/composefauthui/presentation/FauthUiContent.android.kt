@@ -28,28 +28,36 @@ actual fun FauthUiContent(
     }
 
     val screenState: ScreenEvent? by screenManager.screenState.collectAsState()
+    screenState?.let {
+        println("DEBUG screenState: $it")
+    }
     val isAppInBackground: Boolean by remember(screenState) {
         derivedStateOf {
             screenState?.screenName != screenManager.screenNameOfFirebaseAuthUiLauncher
                     && screenState is ScreenEvent.Stopped
         }
     }
+    println("DEBUG is app in background: $isAppInBackground")
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
 
             when {
                 result.resultCode == Activity.RESULT_OK -> {
+                    println("DEBUG Auth success")
                     fauthResult(FauthSignInResult.Success)
                 }
 
                 result.resultCode == Activity.RESULT_CANCELED && result.idpResponse == null -> {
+
+                    println("DEBUG User cancellation, calling Destroy")
                     if (isAppInBackground.not()) {
                         fauthResult(FauthSignInResult.Destroy)
                     }
                 }
 
                 else -> {
+                    println("DEBUG Auth error")
                     val response = result.idpResponse
                     val exception = response?.error ?: Exception("An unknown error occurred")
                     fauthResult(
@@ -65,6 +73,7 @@ actual fun FauthUiContent(
 
     LaunchedEffect(isAppInBackground) {
         if (authRepository.userAlreadyLogin()) {
+            println("DEBUG User already logged in")
             fauthResult(FauthSignInResult.Success)
         } else {
             try {
@@ -72,6 +81,7 @@ actual fun FauthUiContent(
                 when (val uiComponent = authRepository.uiComponent) {
                     is Intent -> {
                         if (isAppInBackground.not()) {
+                            println("DEBUG Launching auth UI")
                             signInLauncher.launch(uiComponent)
                         }
                     }
