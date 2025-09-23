@@ -46,50 +46,54 @@ actual fun FauthUiContent(
     }
 
     var authState by remember { mutableStateOf(AuthState.IDLE) }
-    var wasInBackground by remember { mutableStateOf(false) }
-    var hasUserCanceled by remember { mutableStateOf(false) }
+    var appWentToBackground by remember { mutableStateOf(false) }
     var authLaunchTime by remember { mutableStateOf(0L) }
+    var lastPauseTime by remember { mutableStateOf(0L) }
 
     println("DEBUG authState: $authState")
-    println("DEBUG wasInBackground: $wasInBackground")
-    println("DEBUG hasUserCanceled: $hasUserCanceled")
-    println("DEBUG LifecycleOwner: ${lifecycleOwner::class.java.simpleName}")
-    println("DEBUG Activity: ${activity?.javaClass?.simpleName}")
+    println("DEBUG appWentToBackground: $appWentToBackground")
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
             val response = result.idpResponse
             val currentTime = System.currentTimeMillis()
             val timeSinceLaunch = currentTime - authLaunchTime
+            val timeSincePause = currentTime - lastPauseTime
 
             println("DEBUG Launcher result: ${result.resultCode}")
-            println("DEBUG Response: $response")
             println("DEBUG Time since launch: ${timeSinceLaunch}ms")
-            println("DEBUG wasInBackground at result: $wasInBackground")
+            println("DEBUG Time since last pause: ${timeSincePause}ms")
+            println("DEBUG appWentToBackground: $appWentToBackground")
 
             when {
                 result.resultCode == Activity.RESULT_OK -> {
                     println("DEBUG Success result")
                     authState = AuthState.COMPLETED
+                    appWentToBackground = false
                     fauthResult(FauthSignInResult.Success)
                 }
 
                 result.resultCode == Activity.RESULT_CANCELED && response == null -> {
-                    println("DEBUG Cancel result - wasInBackground: $wasInBackground, timeSinceLaunch: $timeSinceLaunch")
+                    // Criterios para detectar cancelación técnica:
+                    // 1. La app fue a background Y el resultado llegó muy rápido después de volver
+                    // 2. O el resultado llegó muy rápido en general (menos de 1 segundo)
+                    val isQuickCancel = timeSinceLaunch < 1000
+                    val isBackgroundCancel = appWentToBackground && timeSincePause < 2000
+                    val isProbablyTechnical = isQuickCancel || isBackgroundCancel
 
-                    // Si la cancelación ocurrió muy rápido (menos de 2 segundos) es probablemente técnica
-                    val isProbablyTechnicalCancel = (timeSinceLaunch < 2000) || wasInBackground
+                    println("DEBUG Cancel analysis:")
+                    println("  - isQuickCancel: $isQuickCancel")
+                    println("  - isBackgroundCancel: $isBackgroundCancel")
+                    println("  - isProbablyTechnical: $isProbablyTechnical")
 
-                    if (isProbablyTechnicalCancel) {
+                    if (isProbablyTechnical) {
                         println("DEBUG Probable technical cancellation, retrying...")
-                        // Cancelación técnica → reintentar
                         authState = AuthState.LAUNCHING_AUTH
-                        wasInBackground = false // Reset para próximo intento
+                        appWentToBackground = false
                     } else {
                         println("DEBUG User cancellation detected")
-                        // Cancelación real del usuario
                         authState = AuthState.COMPLETED
-                        hasUserCanceled = true
+                        appWentToBackground = false
                         fauthResult(FauthSignInResult.Destroy)
                     }
                 }
@@ -97,6 +101,7 @@ actual fun FauthUiContent(
                 else -> {
                     println("DEBUG Error result")
                     authState = AuthState.COMPLETED
+                    appWentToBackground = false
                     val exception = response?.error ?: Exception("An unknown error occurred")
                     fauthResult(
                         FauthSignInResult.Error(
@@ -128,38 +133,34 @@ actual fun FauthUiContent(
 
             AuthState.LAUNCHING_AUTH -> {
                 println("DEBUG LaunchedEffect: Launching auth...")
-                if (!hasUserCanceled) {
-                    try {
-                        // Pequeño delay si es un reintento
-                        if (wasInBackground) {
-                            println("DEBUG Adding retry delay...")
-                            delay(500)
-                        }
-
-                        authRepository.configure(fauthConfiguration)
-                        when (val uiComponent = authRepository.uiComponent) {
-                            is Intent -> {
-                                authState = AuthState.WAITING_RESULT
-                                authLaunchTime = System.currentTimeMillis()
-                                println("DEBUG Launching Intent at: $authLaunchTime")
-                                signInLauncher.launch(uiComponent)
-                            }
-
-                            else -> {
-                                authState = AuthState.COMPLETED
-                                fauthResult(
-                                    FauthSignInResult.Error(
-                                        Exception("Invalid UI component type")
-                                    )
-                                )
-                            }
-                        }
-                    } catch (exception: Exception) {
-                        authState = AuthState.COMPLETED
-                        fauthResult(FauthSignInResult.Error(exception))
+                try {
+                    // Pequeño delay si es un reintento
+                    if (appWentToBackground) {
+                        println("DEBUG Adding retry delay...")
+                        delay(300)
                     }
-                } else {
-                    hasUserCanceled = false
+
+                    authRepository.configure(fauthConfiguration)
+                    when (val uiComponent = authRepository.uiComponent) {
+                        is Intent -> {
+                            authState = AuthState.WAITING_RESULT
+                            authLaunchTime = System.currentTimeMillis()
+                            println("DEBUG Launching Intent at: $authLaunchTime")
+                            signInLauncher.launch(uiComponent)
+                        }
+
+                        else -> {
+                            authState = AuthState.COMPLETED
+                            fauthResult(
+                                FauthSignInResult.Error(
+                                    Exception("Invalid UI component type")
+                                )
+                            )
+                        }
+                    }
+                } catch (exception: Exception) {
+                    authState = AuthState.COMPLETED
+                    fauthResult(FauthSignInResult.Error(exception))
                 }
             }
 
@@ -168,47 +169,47 @@ actual fun FauthUiContent(
         }
     }
 
-    val scope = rememberCoroutineScope()
     DisposableEffect(lifecycleOwner) {
         println("DEBUG Setting up lifecycle observer")
 
         val observer = LifecycleEventObserver { source, event ->
-            println("DEBUG Lifecycle event: $event from $source")
+            println("DEBUG Lifecycle event: $event from ${source::class.java.simpleName}")
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
                     println("DEBUG ON_PAUSE - authState: $authState")
                     if (authState == AuthState.WAITING_RESULT) {
-                        println("DEBUG Setting wasInBackground = true")
-                        wasInBackground = true
+                        lastPauseTime = System.currentTimeMillis()
+                        appWentToBackground = true
+                        println("DEBUG Marking app as went to background at: $lastPauseTime")
                     }
+                }
+
+                Lifecycle.Event.ON_STOP -> {
+                    println("DEBUG ON_STOP")
+                    // Confirmamos que definitivamente fuimos a background
+                    if (authState == AuthState.WAITING_RESULT) {
+                        appWentToBackground = true
+                        println("DEBUG Confirmed app went to background (ON_STOP)")
+                    }
+                }
+
+                Lifecycle.Event.ON_START -> {
+                    println("DEBUG ON_START")
+                    // NO reseteamos appWentToBackground aquí
+                    // Lo dejamos para que se detecte en el launcher result
                 }
 
                 Lifecycle.Event.ON_RESUME -> {
                     println("DEBUG ON_RESUME")
-                    scope.launch {
-                        delay(300) // Reducido el delay
-                        println("DEBUG Setting wasInBackground = false after delay")
-                        wasInBackground = false
-                    }
+                    // Tampoco reseteamos aquí, dejamos que el launcher lo maneje
                 }
-
-                Lifecycle.Event.ON_START -> println("DEBUG ON_START")
-                Lifecycle.Event.ON_STOP -> println("DEBUG ON_STOP")
-                Lifecycle.Event.ON_CREATE -> println("DEBUG ON_CREATE")
-                Lifecycle.Event.ON_DESTROY -> println("DEBUG ON_DESTROY")
 
                 else -> Unit
             }
         }
 
         lifecycleOwner.lifecycle.addObserver(observer)
-        println("DEBUG Lifecycle observer added to: ${lifecycleOwner.lifecycle}")
-
-        // También agregar el observer directamente a la Activity si está disponible
         activity?.lifecycle?.addObserver(observer)
-        if (activity != null) {
-            println("DEBUG Lifecycle observer also added to activity: ${activity.lifecycle}")
-        }
 
         onDispose {
             println("DEBUG Removing lifecycle observer")
