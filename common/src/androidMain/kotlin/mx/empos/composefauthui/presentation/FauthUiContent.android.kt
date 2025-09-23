@@ -71,7 +71,7 @@ actual fun FauthUiContent(
             }
         }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(isAppInBackground) {
         if (authRepository.userAlreadyLogin()) {
             println("DEBUG User already logged in")
             fauthResult(FauthSignInResult.Success)
@@ -80,8 +80,10 @@ actual fun FauthUiContent(
                 authRepository.configure(fauthConfiguration)
                 when (val uiComponent = authRepository.uiComponent) {
                     is Intent -> {
-                        println("DEBUG Launching auth UI")
-                        signInLauncher.launch(uiComponent)
+                        if (isAppInBackground.not()) {
+                            println("DEBUG Launching auth UI")
+                            signInLauncher.launch(uiComponent)
+                        }
                     }
 
                     else -> {
