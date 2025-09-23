@@ -4,14 +4,29 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthSignInResult
 import mx.empos.composefauthui.framework.AndroidAuthRepository
+
+enum class AuthState {
+    IDLE,
+    CHECKING_LOGIN,
+    LAUNCHING_AUTH,
+    WAITING_RESULT,
+    COMPLETED
+}
 
 @Composable
 actual fun FauthUiContent(
@@ -19,59 +34,115 @@ actual fun FauthUiContent(
     fauthResult: (FauthSignInResult) -> Unit
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val authRepository: AuthRepository = remember {
         AndroidAuthRepository(context)
+    }
+
+    var authState by remember { mutableStateOf(AuthState.IDLE) }
+    var wasInBackground by remember { mutableStateOf(false) }
+    var hasUserCanceled by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_PAUSE -> {
+                    if (authState == AuthState.WAITING_RESULT) {
+                        wasInBackground = true
+                    }
+                }
+
+                else -> {}
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
             val response = result.idpResponse
+
             when {
                 result.resultCode == Activity.RESULT_OK -> {
-                    fauthResult(FauthSignInResult.Success(result.resultCode))
+                    authState = AuthState.COMPLETED
+                    wasInBackground = false
+                    fauthResult(FauthSignInResult.Success)
                 }
 
-                result.resultCode == Activity.RESULT_CANCELED  && response == null-> {
-                    fauthResult(FauthSignInResult.Destroy(result.resultCode))
+                result.resultCode == Activity.RESULT_CANCELED && response == null -> {
+                    if (wasInBackground) {
+                        wasInBackground = false
+                        authState = AuthState.LAUNCHING_AUTH
+                    } else {
+                        authState = AuthState.COMPLETED
+                        hasUserCanceled = true
+                        fauthResult(FauthSignInResult.Destroy)
+                    }
                 }
 
                 else -> {
+                    authState = AuthState.COMPLETED
+                    wasInBackground = false
                     val exception = response?.error ?: Exception("An unknown error occurred")
                     fauthResult(
                         FauthSignInResult.Error(
                             exception = exception,
                             errorCode = response?.error?.errorCode,
-                            errorMessage = response?.error?.message,
-                            code = result.resultCode
+                            errorMessage = response?.error?.message
                         )
                     )
                 }
             }
         }
 
+    LaunchedEffect(authState) {
+        when (authState) {
+            AuthState.IDLE -> {
+                authState = AuthState.CHECKING_LOGIN
+            }
 
-    LaunchedEffect(Unit) {
-        if (authRepository.userAlreadyLogin()) {
-            fauthResult(FauthSignInResult.Success(-1))
-        } else {
-            try {
-                authRepository.configure(fauthConfiguration)
-                when (val uiComponent = authRepository.uiComponent) {
-                    is Intent -> {
-                        signInLauncher.launch(uiComponent)
-                    }
+            AuthState.CHECKING_LOGIN -> {
+                if (authRepository.userAlreadyLogin()) {
+                    authState = AuthState.COMPLETED
+                    fauthResult(FauthSignInResult.Success)
+                } else {
+                    authState = AuthState.LAUNCHING_AUTH
+                }
+            }
 
-                    else -> {
-                        fauthResult(
-                            FauthSignInResult.Error(
-                                Exception("Invalid UI component type")
-                            )
-                        )
+            AuthState.LAUNCHING_AUTH -> {
+                if (!hasUserCanceled) {
+                    try {
+                        authRepository.configure(fauthConfiguration)
+                        when (val uiComponent = authRepository.uiComponent) {
+                            is Intent -> {
+                                authState = AuthState.WAITING_RESULT
+                                wasInBackground = false
+                                signInLauncher.launch(uiComponent)
+                            }
+
+                            else -> {
+                                authState = AuthState.COMPLETED
+                                fauthResult(
+                                    FauthSignInResult.Error(
+                                        Exception("Invalid UI component type")
+                                    )
+                                )
+                            }
+                        }
+                    } catch (exception: Exception) {
+                        authState = AuthState.COMPLETED
+                        fauthResult(FauthSignInResult.Error(exception))
                     }
                 }
-            } catch (e: Exception) {
-                fauthResult(FauthSignInResult.Error(e))
             }
+
+            AuthState.WAITING_RESULT,
+            AuthState.COMPLETED -> Unit
         }
     }
 }

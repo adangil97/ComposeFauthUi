@@ -1,15 +1,14 @@
 package mx.empos.composefauthui.domain
 
-sealed class FauthSignInResult(open val code: Int) {
+sealed class FauthSignInResult {
 
-    data class Success(override val code: Int = 0) : FauthSignInResult(code)
+    data object Success : FauthSignInResult()
 
-    data class Destroy(override val code: Int = 0) : FauthSignInResult(code)
+    data object Destroy : FauthSignInResult()
 
     data class Error(
         val exception: Throwable,
         val errorCode: Int? = null,
         val errorMessage: String? = null,
-        override val code: Int = 0
-    ) : FauthSignInResult(code)
+    ) : FauthSignInResult()
 }
