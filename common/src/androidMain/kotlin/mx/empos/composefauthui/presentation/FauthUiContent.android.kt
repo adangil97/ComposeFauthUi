@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.Lifecycle
@@ -18,7 +18,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthSignInResult
@@ -47,8 +46,8 @@ actual fun FauthUiContent(
 
     var authState by remember { mutableStateOf(AuthState.IDLE) }
     var appWentToBackground by remember { mutableStateOf(false) }
-    var authLaunchTime by remember { mutableStateOf(0L) }
-    var lastPauseTime by remember { mutableStateOf(0L) }
+    var authLaunchTime by remember { mutableLongStateOf(0L) }
+    var lastPauseTime by remember { mutableLongStateOf(0L) }
 
     println("DEBUG authState: $authState")
     println("DEBUG appWentToBackground: $appWentToBackground")
