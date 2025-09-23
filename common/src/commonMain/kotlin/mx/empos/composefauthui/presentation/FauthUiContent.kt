@@ -7,5 +7,6 @@ import mx.empos.composefauthui.domain.FauthSignInResult
 @Composable
 expect fun FauthUiContent(
     fauthConfiguration: FauthConfiguration,
+    screenManager: ScreenManager,
     fauthResult: (FauthSignInResult) -> Unit
 )
