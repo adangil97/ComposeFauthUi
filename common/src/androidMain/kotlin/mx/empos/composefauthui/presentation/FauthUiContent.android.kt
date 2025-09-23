@@ -5,7 +5,10 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import mx.empos.composefauthui.data.AuthRepository
@@ -24,26 +27,37 @@ actual fun FauthUiContent(
         AndroidAuthRepository(context)
     }
 
+    var isAuthLaunching by remember { mutableStateOf(false) }
+    var appWentToBackgroundDuringAuth by remember { mutableStateOf(false) }
+    var authLaunchTime by remember { mutableStateOf(0L) }
+
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
+            val timeSinceLaunch = System.currentTimeMillis() - authLaunchTime
+            isAuthLaunching = false
+
+            println("DEBUG Launcher result: ${result.resultCode}")
+            println("DEBUG Time since launch: ${timeSinceLaunch}ms")
+            println("DEBUG App went to background during auth: $appWentToBackgroundDuringAuth")
 
             when {
                 result.resultCode == Activity.RESULT_OK -> {
                     println("DEBUG Auth success")
+                    appWentToBackgroundDuringAuth = false
                     fauthResult(FauthSignInResult.Success)
                 }
 
                 result.resultCode == Activity.RESULT_CANCELED && result.idpResponse == null -> {
-                    println("DEBUG Auth canceled - isAppInBackground: ${screenManager.isAppInBackground}")
 
-                    if (screenManager.isAppInBackground.not()) {
-                        println("DEBUG Technical cancellation detected, calling Destroy")
-                        fauthResult(FauthSignInResult.Destroy)
-                    }
+                    println("DEBUG User cancellation, calling Destroy")
+                    fauthResult(FauthSignInResult.Destroy)
+
+                    appWentToBackgroundDuringAuth = false
                 }
 
                 else -> {
                     println("DEBUG Auth error")
+                    appWentToBackgroundDuringAuth = false
                     val response = result.idpResponse
                     val exception = response?.error ?: Exception("An unknown error occurred")
                     fauthResult(
@@ -57,6 +71,34 @@ actual fun FauthUiContent(
             }
         }
 
+    // Escuchar eventos de pantalla
+    LaunchedEffect(screenManager) {
+        screenManager
+            .screenState
+            .collect { event ->
+                println("DEBUG Screen event: $event")
+                println("DEBUG Screen event: ${event.screenName}")
+
+                when (event) {
+                    is ScreenEvent.Stopped -> {
+                        if (isAuthLaunching) {
+                            println("DEBUG App went to background during auth")
+                            appWentToBackgroundDuringAuth = true
+                        }
+                    }
+
+                    is ScreenEvent.Started -> {
+                        // App volvió al foreground
+                        println("DEBUG App came back to foreground")
+                    }
+
+                    else -> {
+                        // Otros eventos no nos interesan por ahora
+                    }
+                }
+            }
+    }
+
     LaunchedEffect(Unit) {
         if (authRepository.userAlreadyLogin()) {
             println("DEBUG User already logged in")
@@ -67,6 +109,9 @@ actual fun FauthUiContent(
                 when (val uiComponent = authRepository.uiComponent) {
                     is Intent -> {
                         println("DEBUG Launching auth UI")
+                        isAuthLaunching = true
+                        authLaunchTime = System.currentTimeMillis()
+                        appWentToBackgroundDuringAuth = false
                         signInLauncher.launch(uiComponent)
                     }
 
