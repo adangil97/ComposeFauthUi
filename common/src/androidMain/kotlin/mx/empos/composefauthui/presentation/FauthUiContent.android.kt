@@ -33,7 +33,7 @@ actual fun FauthUiContent(
     }
     val isAppInBackground: Boolean by remember(screenState) {
         derivedStateOf {
-            screenState?.screenName == screenManager.screenNameOfFirebaseAuthUiLauncher
+            screenState?.screenName != screenManager.screenNameOfFirebaseAuthUiLauncher
                     && (screenState is ScreenEvent.Stopped || screenState is ScreenEvent.Paused)
         }
     }
