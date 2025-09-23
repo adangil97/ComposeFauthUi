@@ -67,7 +67,7 @@ actual fun FauthUiContent(
             }
         }
 
-    LaunchedEffect(isAppInBackground) {
+    LaunchedEffect(Unit) {
         if (authRepository.userAlreadyLogin()) {
             println("DEBUG User already logged in")
             fauthResult(FauthSignInResult.Success)
