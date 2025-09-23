@@ -101,7 +101,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("mx.empos", "composefauthui", "1.2.2")
+    coordinates("mx.empos", "composefauthui", "1.2.4")
 
     pom {
         name.set("Compose Fauth Ui")
