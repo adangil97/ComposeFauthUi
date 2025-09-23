@@ -45,6 +45,9 @@ actual fun FauthUiContent(
     var authState by remember { mutableStateOf(AuthState.IDLE) }
     var wasInBackground by remember { mutableStateOf(false) }
     var hasUserCanceled by remember { mutableStateOf(false) }
+    println("DEBUG authState: $authState")
+    println("DEBUG wasInBackground: $wasInBackground")
+    println("DEBUG hasUserCanceled: $hasUserCanceled")
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
@@ -135,14 +138,18 @@ actual fun FauthUiContent(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
+                    println("DEBUG ON_PAUSE")
                     if (authState == AuthState.WAITING_RESULT) {
+                        println("DEBUG ON_PAUSE WAITING_RESULT")
                         wasInBackground = true
                     }
                 }
 
                 Lifecycle.Event.ON_RESUME -> {
+                    println("DEBUG ON_RESUME")
                     scope.launch {
-                        delay(100)
+                        delay(500)
+                        println("DEBUG ON_RESUME DELAY")
                         wasInBackground = false
                     }
                 }
