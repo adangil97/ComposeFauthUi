@@ -4,11 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import mx.empos.composefauthui.data.AuthRepository
@@ -26,26 +23,24 @@ actual fun FauthUiContent(
         AndroidAuthRepository(context)
     }
 
-    var isProcessing by remember { mutableStateOf(false) }
-
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
-            isProcessing = false
             if (result.resultCode == Activity.RESULT_OK) {
                 fauthResult(FauthSignInResult.Success)
             } else {
                 val response = result.idpResponse
+                val exception = response?.error ?: Exception("An unknown error occurred")
                 fauthResult(
                     FauthSignInResult.Error(
-                        response?.error ?: Exception("An unknown error occurred")
+                        exception = exception,
+                        errorCode = response?.error?.errorCode,
+                        errorMessage = response?.error?.message
                     )
                 )
             }
         }
 
-    LaunchedEffect(fauthConfiguration) { // Usar la configuración como key
-        if (isProcessing) return@LaunchedEffect
-
+    SideEffect {
         if (authRepository.userAlreadyLogin()) {
             fauthResult(FauthSignInResult.Success)
         } else {
@@ -53,7 +48,6 @@ actual fun FauthUiContent(
                 authRepository.configure(fauthConfiguration)
                 when (val uiComponent = authRepository.uiComponent) {
                     is Intent -> {
-                        isProcessing = true
                         signInLauncher.launch(uiComponent)
                     }
 
