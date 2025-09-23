@@ -5,11 +5,11 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
@@ -27,7 +27,7 @@ actual fun FauthUiContent(
         AndroidAuthRepository(context)
     }
 
-    val screenState: ScreenEvent? by screenManager.screenState.collectAsStateWithLifecycle()
+    val screenState: ScreenEvent? by screenManager.screenState.collectAsState()
     screenState?.let {
         println("DEBUG screenState: $it")
     }
