@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -17,6 +18,7 @@ import mx.empos.composefauthui.data.AuthRepository
 import mx.empos.composefauthui.domain.FauthConfiguration
 import mx.empos.composefauthui.domain.FauthSignInResult
 import mx.empos.composefauthui.framework.AndroidAuthRepository
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 actual fun FauthUiContent(
@@ -39,6 +41,7 @@ actual fun FauthUiContent(
         }
     }
     var loginLaunched by remember { mutableStateOf(false) }
+    var launchTime by remember { mutableLongStateOf(0L) }
     onEvent("is app in background: $isAppInBackground")
 
     val signInLauncher =
@@ -49,14 +52,19 @@ actual fun FauthUiContent(
                     onEvent("Auth success")
                     fauthResult(FauthSignInResult.Success)
                 }
+
                 result.resultCode == Activity.RESULT_CANCELED && result.idpResponse == null -> {
-                    if (isAppInBackground.not() && loginLaunched) {
+                    val currentTime = System.currentTimeMillis()
+                    val timeDifference = currentTime - launchTime
+                    onEvent("User cancellation, time difference: $timeDifference")
+                    if (isAppInBackground.not() && loginLaunched && timeDifference >= 5L.seconds.inWholeMilliseconds) {
                         onEvent("User real cancellation, calling Destroy")
                         fauthResult(FauthSignInResult.Destroy)
                     } else {
                         onEvent("Cancellation ignored (background or lifecycle)")
                     }
                 }
+
                 else -> {
                     onEvent("Auth error")
                     val response = result.idpResponse
@@ -80,9 +88,11 @@ actual fun FauthUiContent(
                     is Intent -> {
                         if (!isAppInBackground) {
                             loginLaunched = true
+                            launchTime = System.currentTimeMillis()
                             signInLauncher.launch(uiComponent)
                         }
                     }
+
                     else -> fauthResult(
                         FauthSignInResult.Error(Exception("Invalid UI component type"))
                     )
