@@ -30,7 +30,7 @@ actual fun rememberFauthUiLauncher(fauthResult: (FauthSignInResult) -> Unit): Fa
                 }
 
                 result.resultCode == Activity.RESULT_CANCELED && result.idpResponse == null -> {
-                    fauthResult(FauthSignInResult.Destroy)
+                    fauthResult(FauthSignInResult.UserCancellation)
                 }
 
                 else -> {

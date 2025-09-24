@@ -4,7 +4,7 @@ sealed class FauthSignInResult {
 
     data object Success : FauthSignInResult()
 
-    data object Destroy : FauthSignInResult()
+    data object UserCancellation : FauthSignInResult()
 
     data class Error(
         val exception: Throwable,
