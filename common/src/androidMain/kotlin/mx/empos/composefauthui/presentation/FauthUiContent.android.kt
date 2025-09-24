@@ -8,7 +8,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import mx.empos.composefauthui.data.AuthRepository
@@ -36,25 +38,25 @@ actual fun FauthUiContent(
                     && screenState is ScreenEvent.Stopped
         }
     }
+    var loginLaunched by remember { mutableStateOf(false) }
     onEvent("is app in background: $isAppInBackground")
 
     val signInLauncher =
         rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { result ->
-
+            loginLaunched = false // siempre limpiar
             when {
                 result.resultCode == Activity.RESULT_OK -> {
                     onEvent("Auth success")
                     fauthResult(FauthSignInResult.Success)
                 }
-
                 result.resultCode == Activity.RESULT_CANCELED && result.idpResponse == null -> {
-
-                    onEvent("User cancellation, calling Destroy")
-                    if (isAppInBackground.not()) {
+                    if (isAppInBackground.not() && loginLaunched) {
+                        onEvent("User real cancellation, calling Destroy")
                         fauthResult(FauthSignInResult.Destroy)
+                    } else {
+                        onEvent("Cancellation ignored (background or lifecycle)")
                     }
                 }
-
                 else -> {
                     onEvent("Auth error")
                     val response = result.idpResponse
@@ -71,32 +73,25 @@ actual fun FauthUiContent(
         }
 
     LaunchedEffect(isAppInBackground) {
-        if (authRepository.userAlreadyLogin()) {
-            onEvent("User already logged in")
-            fauthResult(FauthSignInResult.Success)
-        } else {
+        if (!authRepository.userAlreadyLogin()) {
             try {
                 authRepository.configure(fauthConfiguration)
                 when (val uiComponent = authRepository.uiComponent) {
                     is Intent -> {
-                        onEvent("Launching auth UI $isAppInBackground")
-                        if (isAppInBackground.not()) {
-                            onEvent("Launching auth UI")
+                        if (!isAppInBackground) {
+                            loginLaunched = true
                             signInLauncher.launch(uiComponent)
                         }
                     }
-
-                    else -> {
-                        fauthResult(
-                            FauthSignInResult.Error(
-                                Exception("Invalid UI component type")
-                            )
-                        )
-                    }
+                    else -> fauthResult(
+                        FauthSignInResult.Error(Exception("Invalid UI component type"))
+                    )
                 }
-            } catch (exception: Exception) {
-                fauthResult(FauthSignInResult.Error(exception))
+            } catch (e: Exception) {
+                fauthResult(FauthSignInResult.Error(e))
             }
+        } else {
+            fauthResult(FauthSignInResult.Success)
         }
     }
 }
