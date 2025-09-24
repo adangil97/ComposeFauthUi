@@ -23,8 +23,7 @@ import platform.darwin.NSObject
 @Composable
 actual fun FauthUiContent(
     fauthConfiguration: FauthConfiguration,
-    screenManager: ScreenManager,
-    onEvent: (String) -> Unit,
+    fauthUiLauncher: FauthUiLauncher,
     fauthResult: (FauthSignInResult) -> Unit
 ) {
     val authDelegate = remember {
