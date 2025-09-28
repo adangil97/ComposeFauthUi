@@ -4,7 +4,7 @@ kotlin = "2.1.21"
 androidx-activityCompose = "1.10.1"
 composeVersion = "1.8.1"
 firebaseAuthUi = "9.0.0"
-facebookSdk = "18.0.3"
+facebookSdk = "18.1.3"
 vanniktech = "0.30.0"
 
 ios-summary = "Compose Fauth Ui For KMP Firebase UI"

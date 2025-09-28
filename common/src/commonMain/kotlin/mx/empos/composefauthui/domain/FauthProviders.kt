@@ -4,7 +4,9 @@ sealed class FauthProviders {
 
     data object Google : FauthProviders()
 
-    data object Facebook : FauthProviders()
+    data class Facebook(
+        val extraPermissions: List<String> = emptyList()
+    ) : FauthProviders()
 
     data object Phone : FauthProviders()
 

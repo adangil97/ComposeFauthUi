@@ -42,7 +42,14 @@ class AndroidAuthRepository(
                         .build()
                 }
 
-                FauthProviders.Facebook -> AuthUI.IdpConfig.FacebookBuilder().build()
+                is FauthProviders.Facebook -> AuthUI
+                    .IdpConfig
+                    .FacebookBuilder()
+                    .apply {
+                        this.setPermissions(it.extraPermissions)
+                    }
+                    .build()
+
                 FauthProviders.Google -> AuthUI.IdpConfig.GoogleBuilder().build()
                 FauthProviders.Phone -> AuthUI.IdpConfig.PhoneBuilder().build()
             }
