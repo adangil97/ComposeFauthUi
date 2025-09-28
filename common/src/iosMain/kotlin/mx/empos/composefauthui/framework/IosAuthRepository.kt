@@ -54,7 +54,11 @@ class IosAuthRepository : AuthRepository {
                         )
                     }
 
-                    FauthProviders.Facebook -> FUIFacebookAuth(fuiAuth)
+                    is FauthProviders.Facebook -> FUIFacebookAuth(
+                        authUI = fuiAuth,
+                        permissions = it.extraPermissions
+                    )
+
                     FauthProviders.Google -> FUIGoogleAuth(fuiAuth)
                     FauthProviders.Phone -> FUIPhoneAuth(fuiAuth)
                 }
