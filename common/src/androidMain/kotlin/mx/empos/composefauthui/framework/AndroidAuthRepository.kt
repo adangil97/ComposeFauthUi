@@ -33,11 +33,16 @@ class AndroidAuthRepository(
                 is FauthProviders.Email -> {
                     AuthUI.IdpConfig.EmailBuilder()
                         .apply {
-                            if (it.commonProviderConfiguration.forceSameDevice) {
-                                this.setForceSameDevice()
+                            with(it.commonProviderConfiguration) {
+                                if (forceSameDevice) {
+                                    setForceSameDevice()
+                                }
+                                setAllowNewAccounts(allowNewAccounts)
+                                if (allowNewAccounts.not()) {
+                                    hideEmailSignUp()
+                                }
+                                setRequireName(requireName)
                             }
-                            this.setAllowNewAccounts(it.commonProviderConfiguration.allowNewAccounts)
-                            this.setRequireName(it.commonProviderConfiguration.requireName)
                         }
                         .build()
                 }
