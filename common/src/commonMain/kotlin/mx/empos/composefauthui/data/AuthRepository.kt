@@ -17,6 +17,6 @@ interface AuthRepository {
 
     suspend fun getAuthToken(
         refresh: Boolean,
-        runException: (Exception) -> Unit = {}
+        runException: (Exception) -> Unit
     ): FauthResult?
 }
