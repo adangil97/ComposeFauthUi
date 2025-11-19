@@ -69,6 +69,11 @@ kotlin {
             implementation(libs.firebase.auth.ui)
             implementation(libs.facebook.sdk)
             implementation(libs.androidx.appcompat)
+            implementation(project.dependencies.platform("com.google.firebase:firebase-bom:34.6.0"))
+
+            // Add the dependency for the Firebase Authentication library
+            // When using the BoM, you don't specify versions in Firebase library dependencies
+            implementation("com.google.firebase:firebase-auth")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -101,7 +106,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates("mx.empos", "composefauthui", "1.3.0")
+    coordinates("mx.empos", "composefauthui", "1.3.1")
 
     pom {
         name.set("Compose Fauth Ui")
