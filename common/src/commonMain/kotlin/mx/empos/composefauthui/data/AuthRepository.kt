@@ -15,5 +15,8 @@ interface AuthRepository {
 
     suspend fun logout()
 
-    suspend fun getAuthToken(refresh: Boolean): FauthResult?
+    suspend fun getAuthToken(
+        refresh: Boolean,
+        runException: (Exception) -> Unit = {}
+    ): FauthResult?
 }

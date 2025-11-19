@@ -77,8 +77,11 @@ class AndroidAuthRepository(
         authUi.signOut(context).await()
     }
 
-    override suspend fun getAuthToken(refresh: Boolean): FauthResult? {
-        return getIdToken(refresh)?.let {
+    override suspend fun getAuthToken(
+        refresh: Boolean,
+        runException: (Exception) -> Unit
+    ): FauthResult? {
+        return getIdToken(refresh, runException)?.let {
             FauthResult(
                 token = it.token.orEmpty(),
                 timestamp = (it.expirationTimestamp * 1000)
@@ -86,7 +89,10 @@ class AndroidAuthRepository(
         }
     }
 
-    private suspend fun getIdToken(refresh: Boolean): GetTokenResult? {
-        return auth.currentUser?.getIdToken(refresh)?.await()
+    private suspend fun getIdToken(
+        refresh: Boolean,
+        runException: (Exception) -> Unit
+    ): GetTokenResult? {
+        return auth.currentUser?.getIdToken(refresh)?.await(runException)
     }
 }

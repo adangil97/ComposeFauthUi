@@ -71,8 +71,11 @@ class IosAuthRepository : AuthRepository {
         authUi?.signOutWithError(null)
     }
 
-    override suspend fun getAuthToken(refresh: Boolean): FauthResult? {
-        return getIdToken(refresh)?.let {
+    override suspend fun getAuthToken(
+        refresh: Boolean,
+        runException: (Exception) -> Unit
+    ): FauthResult? {
+        return getIdToken(refresh, runException)?.let {
             FauthResult(
                 token = it.token(),
                 timestamp = (it.authDate().timeIntervalSince1970 * 1000).toLong()
@@ -80,16 +83,23 @@ class IosAuthRepository : AuthRepository {
         }
     }
 
-    private suspend fun getIdToken(refresh: Boolean): FIRAuthTokenResult? {
+    private suspend fun getIdToken(
+        refresh: Boolean,
+        runException: (Exception) -> Unit
+    ): FIRAuthTokenResult? {
         val token = suspendCoroutine { continuation ->
             FUIAuth.defaultAuthUI()?.auth()?.currentUser()
                 ?.getIDTokenResultForcingRefresh(refresh) { authResult, error ->
                     error?.let {
+                        runException(Exception(it.domain))
                         continuation.resume(null)
                     } ?: run {
                         continuation.resume(authResult)
                     }
-                } ?: continuation.resume(null)
+                } ?: run {
+                runException(Exception("Get id token failed"))
+                continuation.resume(null)
+            }
         }
         return token
     }
