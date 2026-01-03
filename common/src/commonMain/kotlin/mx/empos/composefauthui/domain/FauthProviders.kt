@@ -1,20 +1,26 @@
 package mx.empos.composefauthui.domain
 
-sealed class FauthProviders {
+sealed class FauthProviders(open val signButtonText: String?) {
 
-    data object Google : FauthProviders()
+    data class Google(
+        override val signButtonText: String? = null
+    ) : FauthProviders(signButtonText)
 
     data class Facebook(
+        override val signButtonText: String? = null,
         val extraPermissions: List<String> = emptyList()
-    ) : FauthProviders()
+    ) : FauthProviders(signButtonText)
 
-    data object Phone : FauthProviders()
+    data class Phone(
+        override val signButtonText: String? = null
+    ) : FauthProviders(signButtonText)
 
     data class Email(
+        override val signButtonText: String? = null,
         val commonProviderConfiguration: CommonEmailProviderConfiguration = CommonEmailProviderConfiguration(),
         val androidProviderConfiguration: AndroidEmailProviderConfiguration = AndroidEmailProviderConfiguration,
         val iosProviderConfiguration: IosEmailProviderConfiguration = IosEmailProviderConfiguration()
-    ) : FauthProviders()
+    ) : FauthProviders(signButtonText)
 }
 
 data class CommonEmailProviderConfiguration(

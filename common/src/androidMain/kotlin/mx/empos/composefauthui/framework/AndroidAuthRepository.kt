@@ -34,6 +34,7 @@ class AndroidAuthRepository(
                     AuthUI.IdpConfig.EmailBuilder()
                         .apply {
                             with(it.commonProviderConfiguration) {
+                                signInButtonText(it.signButtonText)
                                 if (forceSameDevice) {
                                     setForceSameDevice()
                                 }
@@ -51,12 +52,25 @@ class AndroidAuthRepository(
                     .IdpConfig
                     .FacebookBuilder()
                     .apply {
+                        signInButtonText(it.signButtonText)
                         this.setPermissions(it.extraPermissions)
                     }
                     .build()
 
-                FauthProviders.Google -> AuthUI.IdpConfig.GoogleBuilder().build()
-                FauthProviders.Phone -> AuthUI.IdpConfig.PhoneBuilder().build()
+                is FauthProviders.Google -> AuthUI
+                    .IdpConfig
+                    .GoogleBuilder()
+                    .apply {
+                        signInButtonText(it.signButtonText)
+                    }
+                    .build()
+                is FauthProviders.Phone -> AuthUI
+                    .IdpConfig
+                    .PhoneBuilder()
+                    .apply {
+                        signInButtonText(it.signButtonText)
+                    }
+                    .build()
             }
         }
 

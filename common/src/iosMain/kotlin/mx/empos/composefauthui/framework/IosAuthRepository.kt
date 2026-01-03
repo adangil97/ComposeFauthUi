@@ -59,8 +59,8 @@ class IosAuthRepository : AuthRepository {
                         permissions = it.extraPermissions
                     )
 
-                    FauthProviders.Google -> FUIGoogleAuth(fuiAuth)
-                    FauthProviders.Phone -> FUIPhoneAuth(fuiAuth)
+                    is FauthProviders.Google -> FUIGoogleAuth(fuiAuth)
+                    is FauthProviders.Phone -> FUIPhoneAuth(fuiAuth)
                 }
             }
             uiComponent = fuiAuth
